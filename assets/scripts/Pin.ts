@@ -1,6 +1,8 @@
 import { _decorator, CircleCollider2D, Component, Contact2DType, Node, tween, Vec3 } from 'cc';
 import { Circle } from './Circle';
 import { GameMgr } from './GameMgr';
+import EventCenter from './EventCenter';
+import { EventEnum } from './EventEnum';
 const { ccclass, property } = _decorator;
 
 @ccclass('Pin')
@@ -11,7 +13,7 @@ export class Pin extends Component {
     }
 
     onContactBegin(contact: any) {
-        GameMgr.getInstance().SetGameOver();
+        EventCenter.getInstance().fire(EventEnum.E_GameOver);
     }
 
     protected onDestroy(): void {

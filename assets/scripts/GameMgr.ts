@@ -1,15 +1,12 @@
 import { _decorator, Camera, Color, color, Component, director, Input, input, instantiate, Label, Node, Prefab, tween } from 'cc';
 import { Pin } from './Pin';
 import { Circle } from './Circle';
+import EventCenter from './EventCenter';
+import { EventEnum } from './EventEnum';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameMgr')
 export class GameMgr extends Component {
-
-    private static instance: GameMgr = null;
-    public static getInstance(): GameMgr {
-        return this.instance;
-    }
 
     @property(Camera)
     camera: Camera = null;
@@ -19,7 +16,6 @@ export class GameMgr extends Component {
 
     @property(Color)
     targetColor: Color = new Color(255, 255, 255, 255);
-
 
     @property(Node)
     p1: Node = null;
@@ -34,9 +30,16 @@ export class GameMgr extends Component {
     @property(Prefab)
     pinPrefab: Prefab = null;
 
+
     protected onLoad(): void {
-        GameMgr.instance = this;
         input.on(Input.EventType.TOUCH_START, this.OnTouchStart, this);
+
+        console.log(EventEnum);
+        console.log(EventEnum.E_GameOver);
+
+        EventCenter.getInstance().bind(EventEnum.E_GameOver, () => {
+            this.SetGameOver();
+        });
     }
 
     protected start(): void {
@@ -79,7 +82,7 @@ export class GameMgr extends Component {
         }
     }
 
-    public SetGameOver() {
+    SetGameOver(): void {
         if (this.isGameOver) return;
         this.isGameOver = true;
 
@@ -87,10 +90,10 @@ export class GameMgr extends Component {
 
         tween(this.camera).to(0.5, { orthoHeight: this.targetOrthoSize }, {
             onUpdate: (target, ratio) => {
-                this.camera.clearColor=this.targetColor.lerp(this.targetColor, ratio);
+                this.camera.clearColor = this.targetColor.lerp(this.targetColor, ratio);
             }
         })
-        .start();
+            .start();
 
 
         this.scheduleOnce(() => {
@@ -99,6 +102,17 @@ export class GameMgr extends Component {
 
         console.log("game over");
     }
+
+
+
+    protected onDestroy(): void {
+        EventCenter.getInstance().unBind(EventEnum.E_GameOver, () => {
+            this.SetGameOver();
+        });
+    }
+
+
+
 }
 
 
